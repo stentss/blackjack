@@ -1,5 +1,0 @@
-Flask
-pymysql
-textblob
-python-dotenv
-werkzeug
