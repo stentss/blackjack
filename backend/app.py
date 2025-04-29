@@ -6,25 +6,31 @@ from werkzeug.utils import secure_filename
 import uuid
 from textblob import TextBlob
 
+# Get the current directory (where the app is running)
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 app = Flask(
     __name__,
-    template_folder="/home/rhnguyen/public_html",
-    static_folder="/home/rhnguyen/public_html/static"
+    template_folder=os.path.join(BASE_DIR, '../public_html'),  # assumes public_html is one level up
+    static_folder=os.path.join(BASE_DIR, '../public_html/static')
 )
 
 app.secret_key = 'cd147fb8a2bacb53c58c23ec089588e8d98438119044bdc7c986099dd0e9a79c'
 
+# Database config (leave these for now)
 DB_HOST = 'turing2.cs.olemiss.edu'
 DB_USER = 'rhnguyen'
 DB_PASSWORD = 'olE_miss2025'
 DB_NAME = 'rhnguyen'
-UPLOAD_FOLDER = '/home/rhnguyen/public_html/static/uploads'
+
+# Upload folder inside your project structure
+UPLOAD_FOLDER = os.path.join(BASE_DIR, '../public_html/static/uploads')
 ALLOWED_EXTENSIONS = {'pdf'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Create the upload folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
