@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Approve Educational Content</title>
+  <link rel="stylesheet" href="static/style.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #1f1f2e;
+      color: white;
+      padding: 40px;
+    }
+
+    h2 {
+      color: gold;
+    }
+
+    .content-card {
+      background: #2e2e44;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .content-card h3 {
+      color: #00bcd4;
+      margin-top: 0;
+    }
+
+    .button-row {
+      margin-top: 10px;
+    }
+
+    .button-row button {
+      margin-right: 10px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .approve-btn {
+      background: #00c853;
+      color: white;
+    }
+
+    .reject-btn {
+      background: #d50000;
+      color: white;
+    }
+
+    a {
+      color: #00bcd4;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <h2>Pending Content Approval</h2>
+  <div id="content-list">Loading...</div>
+
+  <script>
+    fetch('/get-unapproved-content')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('content-list');
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+          container.textContent = "✅ No unapproved content.";
+          return;
+        }
+
+        data.forEach(content => {
+          const div = document.createElement('div');
+          div.className = 'content-card';
+          div.innerHTML = `
+            <h3>${content.Title}</h3>
+            <p><strong>Type:</strong> ${content.ContentType}</p>
+            ${content.ContentURL ? `<p><strong>URL:</strong> <a href="${content.ContentURL}" target="_blank">${content.ContentURL}</a></p>` : ''}
+            ${content.ContentText ? `<p><strong>Text:</strong><br>${content.ContentText}</p>` : ''}
+            <p><strong>Created By (UserID):</strong> ${content.CreatedBy}</p>
+            <div class="button-row">
+              <button class="approve-btn" onclick="approve(${content.ID})">✅ Approve</button>
+              <button class="reject-btn" onclick="reject(${content.ID})">❌ Reject</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+
+    function approve(id) {
+      fetch(`/approve-content/${id}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(msg => {
+          alert(msg.message);
+          location.reload();
+        });
+    }
+
+    function reject(id) {
+      fetch(`/reject-content/${id}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(msg => {
+          alert(msg.message);
+          location.reload();
+        });
+    }
+  </script>
+</body>
+</html>

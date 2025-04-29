@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blackjack Mastery Dojo</title>
+    <link rel="stylesheet" href="static/style.css" />
+    <script src="static/script.js" defer></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <header>
+      <div class="nav-container">
+        <div class="logo-area">
+          <h1 class="logo">♣ Blackjack Mastery</h1>
+        </div>
+        <nav class="main-nav">
+          <a href="dashboard.html?tab=learn" title="Learn the Theory">Learn</a>
+          <a href="dashboard.html?tab=drill" title="Drills & Flashcards"
+            >Drill</a
+          >
+          <a href="dashboard.html?tab=simulate" title="Simulated Play"
+            >Simulate</a
+          >
+          <a href="#" onclick="logout()">Logout</a>
+        </nav>
+        <div class="auth-links">
+          <a href="login.html">Login</a>
+          <a href="register.html">Register</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero">
+      <h2 id="hero-welcome">Welcome to the Dojo</h2>
+      <p>Here, counting cards isn't a trick — it's a discipline.</p>
+    </section>
+
+    <!-- Training Paths -->
+    <section id="training-paths">
+      <div class="path-card" id="learn">
+        <h3>📘 Learn</h3>
+        <p>
+          Start with the fundamentals of blackjack theory and counting systems
+          like Hi-Lo and Wong Halves.
+        </p>
+      </div>
+      <div class="path-card" id="drill">
+        <h3>🧠 Drill</h3>
+        <p>
+          Run memory drills and flashcards. Master card values, counts, and
+          quick calculations under pressure.
+        </p>
+      </div>
+      <div class="path-card" id="simulate">
+        <h3>🎮 Simulate</h3>
+        <p>
+          Put your skills to the test with a realistic, interactive blackjack
+          game that tracks your count live.
+        </p>
+      </div>
+    </section>
+
+    <!-- Quote Section -->
+    <section id="quote">
+      <div class="quote-box">
+        <p class="quote-text">
+          "A disciplined mind is your greatest edge in the casino."
+        </p>
+        <p class="quote-author">— Blackjack Grandmaster</p>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section id="cta">
+      <h2>Ready to Enter the Dojo?</h2>
+      <button onclick="window.location.href='dashboard.html'">
+        Begin Your Journey
+      </button>
+    </section>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("/check_login")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.logged_in && data.user && data.user.Username) {
+              const heroText = document.getElementById("hero-welcome");
+              heroText.textContent = `Welcome ${data.user.Username} (${data.user.Usertype}) to the Dojo`;
+            }
+          });
+      });
+
+      function startTraining() {
+        window.location.href = "#learn";
+      }
+    </script>
+  </body>
+</html>

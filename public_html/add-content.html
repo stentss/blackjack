@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Content</title>
+    <link rel="stylesheet" href="static/style.css" />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background: #1f1f2e;
+        color: white;
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background: #12121a;
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: gold;
+      }
+
+      .container {
+        padding: 40px;
+        max-width: 600px;
+        margin: auto;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      input[type="text"],
+      textarea,
+      select {
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        font-size: 16px;
+      }
+
+      button {
+        background: #00bcd4;
+        color: black;
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      label {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Add Educational Content</h1>
+      <a href="/dashboard.html" style="color: gold; text-decoration: none"
+        >Back to Dashboard</a
+      >
+    </header>
+
+    <div class="container">
+      <form
+        action="/submit-content"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <input type="hidden" name="topic_id" id="topic_id" />
+
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required />
+
+        <label for="content_type">Content Type</label>
+        <select name="content_type" id="content_type" required>
+          <option value="pdf">PDF</option>
+          <option value="video">YouTube Video</option>
+          <option value="text">Written Explanation</option>
+        </select>
+
+        <label for="content_url">Content URL (YouTube or PDF link)</label>
+        <input type="text" id="content_url" name="content_url" />
+
+        <label for="content_file">Or Upload PDF File</label>
+        <input
+          type="file"
+          id="content_file"
+          name="content_file"
+          accept="application/pdf"
+        />
+
+        <label for="content_text">Optional Text Content</label>
+        <textarea id="content_text" name="content_text" rows="5"></textarea>
+
+        <button type="submit">Upload Content</button>
+      </form>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const topicId = params.get("topic_id");
+      if (topicId) {
+        document.getElementById("topic_id").value = topicId;
+      } else {
+        alert("No topic ID found in URL.");
+      }
+    </script>
+  </body>
+</html>
