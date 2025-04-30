@@ -36,12 +36,21 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_db_connection():
+    # local connection
+    # return pymysql.connect(
+    #     user=DB_USER,
+    #     password=DB_PASSWORD,
+    #     database=DB_NAME,
+    #     unix_socket='/var/run/mysqld/mysqld.sock',
+    #     cursorclass=pymysql.cursors.DictCursor
+    # )
     return pymysql.connect(
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME,
-        unix_socket='/var/run/mysqld/mysqld.sock',
-        cursorclass=pymysql.cursors.DictCursor
+    host=DB_HOST,
+    user=DB_USER,
+    password=DB_PASSWORD,
+    database=DB_NAME,
+    port=3306,
+    cursorclass=pymysql.cursors.DictCursor
     )
 
 @app.route('/favicon.ico')
