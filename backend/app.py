@@ -18,10 +18,10 @@ app = Flask(
 app.secret_key = 'cd147fb8a2bacb53c58c23ec089588e8d98438119044bdc7c986099dd0e9a79c'
 
 # Database config (leave these for now)
-DB_HOST = 'turing2.cs.olemiss.edu'
-DB_USER = 'rhnguyen'
-DB_PASSWORD = 'olE_miss2025'
-DB_NAME = 'rhnguyen'
+DB_HOST = 'mysql-blackjack.alwaysdata.net'
+DB_USER = 'blackjack'
+DB_PASSWORD = 'Q^s5wFYeniZ49tC2'
+DB_NAME = 'blackjack_mastery'
 
 # Upload folder inside your project structure
 UPLOAD_FOLDER = os.path.join(BASE_DIR, '../public_html/static/uploads')
