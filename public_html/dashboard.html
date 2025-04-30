@@ -173,7 +173,7 @@
           <a
             href="approve-content.html"
             style="color: lightgreen; font-weight: bold"
-            >✅ Approve Content</a
+            >Approve Content</a
           >
         </div>
       </div>
@@ -188,9 +188,9 @@
     </header>
 
     <nav class="tabs">
-      <div class="tab active" data-tab="learn">📘 Learn</div>
-      <div class="tab" data-tab="drill">🧠 Drill</div>
-      <div class="tab" data-tab="simulate">🎮 Simulate</div>
+      <div class="tab active" data-tab="learn">Learn</div>
+      <div class="tab" data-tab="drill">Drill</div>
+      <div class="tab" data-tab="simulate">Simulate</div>
     </nav>
 
     <main>
@@ -286,7 +286,7 @@
                 if (topic.IsApproved == 0) {
                   const approveBtn = document.createElement("button");
                   approveBtn.className = "approve-btn";
-                  approveBtn.textContent = "✅ Approve";
+                  approveBtn.textContent = "Approve";
                   approveBtn.onclick = (e) => {
                     e.preventDefault();
                     fetch(`/approve-topic/${topic.TopicID}`, { method: "POST" })
@@ -299,7 +299,7 @@
 
                   const rejectBtn = document.createElement("button");
                   rejectBtn.className = "reject-btn";
-                  rejectBtn.textContent = "❌ Reject";
+                  rejectBtn.textContent = "Reject";
                   rejectBtn.onclick = (e) => {
                     e.preventDefault();
                     fetch(`/reject-topic/${topic.TopicID}`, { method: "POST" })
@@ -315,7 +315,7 @@
                 } else {
                   const deleteBtn = document.createElement("button");
                   deleteBtn.className = "delete-btn";
-                  deleteBtn.textContent = "🗑️ Delete";
+                  deleteBtn.textContent = "Delete";
                   deleteBtn.onclick = (e) => {
                     e.preventDefault();
                     deleteTopic(topic.TopicID);
