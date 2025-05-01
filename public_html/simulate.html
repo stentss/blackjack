@@ -1,374 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blackjack Simulation</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #121212;
-        color: #f5f5f5;
-      }
-      .container {
-        text-align: center;
-        padding: 20px;
-      }
-      .card {
-        display: inline-block;
-        width: 60px;
-        height: 90px;
-        margin: 10px;
-        background: white;
-        color: black;
-        font-size: 24px;
-        line-height: 90px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-      }
-      button {
-        margin: 5px;
-        padding: 10px 20px;
-        border-radius: 6px;
-        background-color: #444;
-        color: white;
-        font-size: 16px;
-        border: none;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #666;
-      }
-      .settings,
-      .betting,
-      .game-area {
-        display: none;
-      }
-      .hand {
-        margin: 10px;
-      }
-      #home-button {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        background-color: #444;
-        color: white;
-        text-decoration: none;
-        padding: 8px 14px;
-        border-radius: 6px;
-        font-weight: bold;
-      }
-      .totals {
-        margin: 10px;
-        font-size: 18px;
-      }
-    </style>
-  </head>
-  <body>
-    <a href="dashboard.html" id="home-button">🏠 Home</a>
-    <div class="container">
-      <div class="settings">
-        <h2>Simulation Settings</h2>
-        <label>Decks:
-          <select id="deck-count">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6" selected>6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-          </select> 
-        </label><br /><br />
-        <label>Initial Balance:
-          <select id="initial-balance">
-            <option value="100">$100</option>
-            <option value="1000" selected>$1000</option>
-            <option value="10000">$10000</option>
-          </select> 
-        </label><br /><br />
-        <label>
-          <input type="checkbox" id="soft17" checked /> Dealer hits on soft 17
-        </label><br /><br />
-        <button onclick="showBetting()">Continue</button>
-      </div>
-
-      <div class="betting">
-        <h2>Place Your Bet</h2>
-        <div id="balance-display"></div>
-        <div id="bet-display"></div>
-        <div id="bet-buttons"></div>
-        <button onclick="startGame()">Deal</button>
-      </div>
-
-      <div class="game-area">
-        <h2>Blackjack Game</h2>
-        <div id="dealer-hand" class="hand"></div>
-        <div id="player-hand" class="hand"></div>
-        <div id="controls">
-          <button onclick="hit()">Hit</button>
-          <button onclick="stand()">Stand</button>
-          <button onclick="doubleDown()">Double</button>
-        </div>
-        <h2 id="result"></h2>
-        <div id="current-bet"></div>
-        <div id="next-round" style="display: none">
-          <button onclick="nextRound()">Next Round</button>
-        </div>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blackjack Simulation</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #f5f5f5;
+      position: relative;
+    }
+    .container {
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      display: inline-block;
+      width: 60px;
+      height: 90px;
+      margin: 10px;
+      background: white;
+      color: black;
+      font-size: 24px;
+      line-height: 90px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      background-color: #444;
+      color: white;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #666;
+    }
+    .settings, .betting, .game-area {
+      display: none;
+    }
+    .hand {
+      margin: 10px;
+    }
+    #home-button {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background-color: #444;
+      color: white;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    .totals {
+      margin: 10px;
+      font-size: 18px;
+    }
+    #strategy-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #007acc;
+      border-radius: 50px;
+      padding: 10px 20px;
+      font-size: 14px;
+      z-index: 1000;
+    }
+    #strategy-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    #strategy-popup img {
+      max-width: 80%;
+      max-height: 80%;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    #strategy-popup .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <a href="dashboard.html" id="home-button">🏠 Home</a>
+  <div class="container">
+    <div class="settings">
+      <h2>Simulation Settings</h2>
+      <label>Decks:
+        <select id="deck-count">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6" selected>6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+        </select> 
+      </label><br /><br />
+      <label>Initial Balance:
+        <select id="initial-balance">
+          <option value="100">$100</option>
+          <option value="1000" selected>$1000</option>
+          <option value="10000">$10000</option>
+        </select> 
+      </label><br /><br />
+      <label>
+        <input type="checkbox" id="soft17" checked /> Dealer hits on soft 17
+      </label><br /><br />
+      <button onclick="showBetting()">Continue</button>
     </div>
 
-    <script>
-      let deck = [],
-        playerHand = [],
-        dealerHand = [],
-        bet = 0,
-        balance = 1000,
-        decks = 6,
-        soft17 = true,
-        gameOver = false,
-        roundNumber = 1,
-        totalWagered = 0,
-        totalWon = 0,
-        currentSessionId = null;
+    <div class="betting">
+      <h2>Place Your Bet</h2>
+      <div id="balance-display"></div>
+      <div id="bet-display"></div>
+      <div id="bet-buttons"></div>
+      <button onclick="startGame()">Deal</button>
+    </div>
+    <div class="game-area">
+      <h2>Blackjack Game</h2>
+      <div id="dealer-hand" class="hand"></div>
+      <div id="player-hand" class="hand"></div>
+      <div id="controls">
+        <button onclick="hit()">Hit</button>
+        <button onclick="stand()">Stand</button>
+        <button onclick="doubleDown()">Double</button>
+      </div>
+      <h2 id="result"></h2>
+      <div id="current-bet"></div>
+      <div id="next-round" style="display: none">
+        <button onclick="nextRound()">Next Round</button>
+      </div>
+    </div>
+  </div>
+  <button id="strategy-button" onclick="showStrategyPopup()">Show Strategy Chart</button>
+  <div id="strategy-popup" onclick="hideStrategyPopup()">
+    <span class="close-btn" onclick="hideStrategyPopup()">&times;</span>
+    <img src="https://a.media-amazon.com/images/I/81NSUO6ffyL._SL1500_.jpg" alt="Basic Strategy Chart" />
+  </div>
+  <script>
+    let deck = [],
+      playerHand = [],
+      dealerHand = [],
+      bet = 0,
+      balance = 1000,
+      decks = 6,
+      soft17 = true,
+      gameOver = false,
+      roundNumber = 1,
+      totalWagered = 0,
+      totalWon = 0,
+      currentSessionId = null;
 
-      function showSettings() {
-        document.querySelector(".settings").style.display = "block";
-      }
+    function showSettings() {
+      document.querySelector(".settings").style.display = "block";
+    }
 
-      function showBetting() {
-        decks = parseInt(document.getElementById("deck-count").value);
-        balance = parseInt(document.getElementById("initial-balance").value);
-        soft17 = document.getElementById("soft17").checked;
+    function showBetting() {
+      decks = parseInt(document.getElementById("deck-count").value);
+      balance = parseInt(document.getElementById("initial-balance").value);
+      soft17 = document.getElementById("soft17").checked;
 
-        fetch("/start-session", { method: "POST" })
-          .then((res) => res.json())
-          .then((data) => {
-            currentSessionId = data.session_id;
-            console.log("Session started:", currentSessionId);
-          })
-          .catch((err) => console.error("Failed to start session", err));
+      fetch("/start-session", { method: "POST" })
+        .then((res) => res.json())
+        .then((data) => {
+          currentSessionId = data.session_id;
+          console.log("Session started:", currentSessionId);
+        })
+        .catch((err) => console.error("Failed to start session", err));
 
-        document.querySelector(".settings").style.display = "none";
-        document.querySelector(".betting").style.display = "block";
-        updateBalance();
-        renderBetButtons();
-        createDeck();
-      }
+      document.querySelector(".settings").style.display = "none";
+      document.querySelector(".betting").style.display = "block";
+      updateBalance();
+      renderBetButtons();
+      createDeck();
+    }
 
-      function updateBalance() {
-        document.getElementById("balance-display").innerText = `Balance: $${balance}`;
-        document.getElementById("bet-display").innerText = `Current Bet: $${bet}`;
-        document.getElementById("current-bet").innerText = `Bet: $${bet}`;
-      }
+    function updateBalance() {
+      document.getElementById("balance-display").innerText = `Balance: $${balance}`;
+      document.getElementById("bet-display").innerText = `Current Bet: $${bet}`;
+      document.getElementById("current-bet").innerText = `Bet: $${bet}`;
+    }
 
-      function renderBetButtons() {
-        const container = document.getElementById("bet-buttons");
-        container.innerHTML = "";
-        [0, 5, 25, 100].forEach((val) => {
-          const btn = document.createElement("button");
-          btn.innerText = `$${val}`;
-          btn.onclick = () => {
-            if (val === 0) {
-              bet = 0;
-            } else if (val <= balance) {
-              bet += val;
-            }
-            updateBalance();
-          };
-          container.appendChild(btn);
-        });
-      }
+    function renderBetButtons() {
+      const container = document.getElementById("bet-buttons");
+      container.innerHTML = "";
+      [0, 5, 25, 100].forEach((val) => {
+        const btn = document.createElement("button");
+        btn.innerText = `$${val}`;
+        btn.onclick = () => {
+          if (val === 0) {
+            bet = 0;
+          } else if (val <= balance) {
+            bet += val;
+          }
+          updateBalance();
+        };
+        container.appendChild(btn);
+      });
+    }
 
-      function createDeck() {
-        const suits = ["♠", "♥", "♦", "♣"];
-        const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
-        deck = [];
-        for (let d = 0; d < decks; d++) {
-          for (let suit of suits) {
-            for (let rank of ranks) {
-              deck.push({ rank, suit });
-            }
+    function createDeck() {
+      const suits = ["♠", "♥", "♦", "♣"];
+      const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+      deck = [];
+      for (let d = 0; d < decks; d++) {
+        for (let suit of suits) {
+          for (let rank of ranks) {
+            deck.push({ rank, suit });
           }
         }
-        deck.sort(() => Math.random() - 0.5);
+      }
+      deck.sort(() => Math.random() - 0.5);
+    }
+
+    function drawCard() {
+      if (deck.length === 0) {
+        alert("Deck is empty! Ending session.");
+        endSession();
+        return null;
+      }
+      return deck.pop();
+    }
+
+    function startGame() {
+      if (bet === 0 || bet > balance) return alert("Invalid bet.");
+      if (deck.length < 4) {
+        alert("Not enough cards to start a round. Ending session.");
+        endSession();
+        return;
       }
 
-      function drawCard() {
-        if (deck.length === 0) {
-          alert("Deck is empty! Ending session.");
-          endSession();
-          return null;
-        }
-        return deck.pop();
+      balance -= bet;
+      totalWagered += bet;
+      updateBalance();
+
+      playerHand = [drawCard(), drawCard()];
+      dealerHand = [drawCard(), drawCard()];
+      document.querySelector(".betting").style.display = "none";
+      document.querySelector(".game-area").style.display = "block";
+      document.getElementById("result").innerText = "";
+      document.getElementById("next-round").style.display = "none";
+      gameOver = false;
+      renderHands();
+
+      roundNumber++;
+    }
+
+    function renderHands(showDealerHole = false) {
+      const dHand = document.getElementById("dealer-hand");
+      const pHand = document.getElementById("player-hand");
+      dHand.innerHTML = `<h3>Dealer (${showDealerHole ? getValue(dealerHand) : "?"})</h3>`;
+      pHand.innerHTML = `<h3>Player (${getValue(playerHand)})</h3>`;
+      dealerHand.forEach((card, idx) => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerText = idx === 1 && !showDealerHole ? "?" : card.rank + card.suit;
+        dHand.appendChild(div);
+      });
+      playerHand.forEach((card) => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerText = card.rank + card.suit;
+        pHand.appendChild(div);
+      });
+    }
+
+    function getValue(hand) {
+      let total = 0, aces = 0;
+      for (const card of hand) {
+        if (["K", "Q", "J"].includes(card.rank)) total += 10;
+        else if (card.rank === "A") { total += 11; aces++; }
+        else total += parseInt(card.rank);
       }
+      while (total > 21 && aces > 0) { total -= 10; aces--; }
+      return total;
+    }
 
-      function startGame() {
-        if (bet === 0 || bet > balance) return alert("Invalid bet.");
-        if (deck.length < 4) {
-          alert("Not enough cards to start a round. Ending session.");
-          endSession();
-          return;
-        }
-
-        balance -= bet;
-        totalWagered += bet;
-        updateBalance();
-
-        playerHand = [drawCard(), drawCard()];
-        dealerHand = [drawCard(), drawCard()];
-        document.querySelector(".betting").style.display = "none";
-        document.querySelector(".game-area").style.display = "block";
-        document.getElementById("result").innerText = "";
-        document.getElementById("next-round").style.display = "none";
-        gameOver = false;
-        renderHands();
-
-        roundNumber++;
+    function hit() {
+      if (gameOver) return;
+      const card = drawCard();
+      if (!card) return;
+      playerHand.push(card);
+      renderHands();
+      if (getValue(playerHand) > 21) {
+        endGame("Bust! You lose.");
       }
+    }
 
-      function renderHands(showDealerHole = false) {
-        const dHand = document.getElementById("dealer-hand");
-        const pHand = document.getElementById("player-hand");
-        dHand.innerHTML = `<h3>Dealer (${showDealerHole ? getValue(dealerHand) : "?"})</h3>`;
-        pHand.innerHTML = `<h3>Player (${getValue(playerHand)})</h3>`;
-        dealerHand.forEach((card, idx) => {
-          const div = document.createElement("div");
-          div.className = "card";
-          div.innerText = idx === 1 && !showDealerHole ? "?" : card.rank + card.suit;
-          dHand.appendChild(div);
-        });
-        playerHand.forEach((card) => {
-          const div = document.createElement("div");
-          div.className = "card";
-          div.innerText = card.rank + card.suit;
-          pHand.appendChild(div);
-        });
-      }
-
-      function getValue(hand) {
-        let total = 0, aces = 0;
-        for (const card of hand) {
-          if (["K", "Q", "J"].includes(card.rank)) total += 10;
-          else if (card.rank === "A") { total += 11; aces++; }
-          else total += parseInt(card.rank);
-        }
-        while (total > 21 && aces > 0) { total -= 10; aces--; }
-        return total;
-      }
-
-      function hit() {
-        if (gameOver) return;
+    function stand() {
+      if (gameOver) return;
+      renderHands(true);
+      while (getValue(dealerHand) < 17 ||
+        (soft17 && getValue(dealerHand) === 17 && dealerHand.some(c => c.rank === "A"))) {
         const card = drawCard();
         if (!card) return;
-        playerHand.push(card);
-        renderHands();
-        if (getValue(playerHand) > 21) {
-          endGame("Bust! You lose.");
-        }
-      }
-
-      function stand() {
-        if (gameOver) return;
+        dealerHand.push(card);
         renderHands(true);
-        while (getValue(dealerHand) < 17 ||
-          (soft17 && getValue(dealerHand) === 17 && dealerHand.some(c => c.rank === "A"))) {
-          const card = drawCard();
-          if (!card) return;
-          dealerHand.push(card);
-          renderHands(true);
-        }
-        const playerVal = getValue(playerHand);
-        const dealerVal = getValue(dealerHand);
-        let result = "";
-        if (dealerVal > 21 || playerVal > dealerVal) {
-          result = "You Win!";
-          balance += bet * 2;
-          totalWon += bet * 2;
-        } else if (dealerVal === playerVal) {
-          result = "Push!";
-          balance += bet;
-        } else {
-          result = "You Lose!";
-        }
-        endGame(result);
       }
-
-      function doubleDown() {
-        if (gameOver || bet * 2 > balance + bet) return alert("Insufficient funds to double.");
-        balance -= bet;
-        bet *= 2;
-        totalWagered += bet;
-        updateBalance();
-        hit();
-        if (!gameOver) stand();
+      const playerVal = getValue(playerHand);
+      const dealerVal = getValue(dealerHand);
+      let result = "";
+      if (dealerVal > 21 || playerVal > dealerVal) {
+        result = "You Win!";
+        balance += bet * 2;
+        totalWon += bet * 2;
+      } else if (dealerVal === playerVal) {
+        result = "Push!";
+        balance += bet;
+      } else {
+        result = "You Lose!";
       }
+      endGame(result);
+    }
 
-      function endGame(message) {
-        gameOver = true;
-        document.getElementById("result").innerText = message;
-        logGame(message);
-        updateBalance();
-        document.getElementById("next-round").style.display = "block";
-      }
+    function doubleDown() {
+      if (gameOver || bet * 2 > balance + bet) return alert("Insufficient funds to double.");
+      balance -= bet;
+      bet *= 2;
+      totalWagered += bet;
+      updateBalance();
+      hit();
+      if (!gameOver) stand();
+    }
 
-      function nextRound() {
-        bet = 0;
-        document.querySelector(".game-area").style.display = "none";
-        document.querySelector(".betting").style.display = "block";
-        updateBalance();
-        renderBetButtons();
-      }
+    function endGame(message) {
+      gameOver = true;
+      document.getElementById("result").innerText = message;
+      logGame(message);
+      updateBalance();
+      document.getElementById("next-round").style.display = "block";
+    }
 
-      function logGame(result) {
-        if (!currentSessionId) return;
-        fetch("/log-game", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            session_id: currentSessionId,
-            round_number: roundNumber,
-            user_action: "completed",
-            dealer_hand: JSON.stringify(dealerHand),
-            user_hand: JSON.stringify(playerHand),
-            result: result,
-          }),
+    function nextRound() {
+      bet = 0;
+      document.querySelector(".game-area").style.display = "none";
+      document.querySelector(".betting").style.display = "block";
+      updateBalance();
+      renderBetButtons();
+    }
+
+    function logGame(result) {
+      if (!currentSessionId) return;
+      fetch("/log-game", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: currentSessionId,
+          round_number: roundNumber,
+          user_action: "completed",
+          dealer_hand: JSON.stringify(dealerHand),
+          user_hand: JSON.stringify(playerHand),
+          result: result,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => { console.log("Game logged:", data); })
+        .catch((err) => console.error("Failed to log game", err));
+    }
+
+    function endSession() {
+      if (!currentSessionId) return;
+      fetch("/end-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: currentSessionId,
+          total_wagered: totalWagered,
+          total_won: totalWon,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Session ended:", data);
+          currentSessionId = null;
+          alert("Session ended! Returning to dashboard.");
+          window.location.href = "dashboard.html";
         })
-          .then((res) => res.json())
-          .then((data) => { console.log("Game logged:", data); })
-          .catch((err) => console.error("Failed to log game", err));
+        .catch((err) => console.error("Failed to end session", err));
+    }
+
+    window.addEventListener("beforeunload", () => {
+      if (currentSessionId) {
+        endSession();
       }
+    });
 
-      function endSession() {
-        if (!currentSessionId) return;
-        fetch("/end-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            session_id: currentSessionId,
-            total_wagered: totalWagered,
-            total_won: totalWon,
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log("Session ended:", data);
-            currentSessionId = null;
-            alert("Session ended! Returning to dashboard.");
-            window.location.href = "dashboard.html";
-          })
-          .catch((err) => console.error("Failed to end session", err));
-      }
+    // Popup control
+    function showStrategyPopup() {
+      document.getElementById("strategy-popup").style.display = "flex";
+    }
+    function hideStrategyPopup() {
+      document.getElementById("strategy-popup").style.display = "none";
+    }
 
-      window.addEventListener("beforeunload", () => {
-        if (currentSessionId) {
-          endSession();
-        }
-      });
-
-      showSettings();
-    </script>
-  </body>
+    showSettings();
+  </script>
+</body>
 </html>
