@@ -105,10 +105,16 @@ def register():
     email = data['email']
     password = generate_password_hash(data['password'])
     security_question = data['securityQuestion']
-    security_answer = generate_password_hash(data['securityAnswer'])  # Hash answer
+    security_answer = generate_password_hash(data['securityAnswer'])
 
     conn = get_db_connection()
     with conn.cursor() as cur:
+        cur.execute("SELECT * FROM User WHERE Username = %s OR Email = %s", (username, email))
+        existing_user = cur.fetchone()
+        if existing_user:
+            conn.close()
+            return jsonify({"error": "Username or email already taken."}), 409
+
         cur.execute(
             """
             INSERT INTO User (Username, Email, Password, Usertype, SecurityQuestion, SecurityAnswer)
