@@ -410,9 +410,13 @@ def delete_content(content_id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT Usertype FROM User WHERE Username = %s", (session['user'],))
+            cur.execute("SELECT Usertype, UserID FROM User WHERE Username = %s", (session['user'],))
             user = cur.fetchone()
-            if not user or user['Usertype'] != 'admin':
+            if not user:
+                return jsonify({"error": "Forbidden"}), 403
+            cur.execute("SELECT CreatedBy FROM EducationalContent WHERE ID = %s", (content_id,))
+            content = cur.fetchone()
+            if not content or (user['Usertype'] != 'admin' and content['CreatedBy'] != user['UserID']):
                 return jsonify({"error": "Forbidden"}), 403
             cur.execute("DELETE FROM Comment WHERE EducationalContent_ID = %s", (content_id,))
             conn.commit()
