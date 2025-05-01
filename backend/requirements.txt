@@ -4,3 +4,4 @@ textblob
 python-dotenv
 werkzeug
 gunicorn
+datetime
