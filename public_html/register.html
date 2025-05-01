@@ -71,12 +71,13 @@
             .then((response) => response.json())
             .then((data) => {
               if (data.message) {
-                window.location.href = "/login.html";
+                  window.location.href = "/login.html";
+              } else if (data.error) {
+                  document.getElementById("error-message").innerText = data.error;
               } else {
-                document.getElementById("error-message").innerText =
-                  "Registration failed.";
+                  document.getElementById("error-message").innerText = "Registration failed.";
               }
-            });
+          });
         });
     </script>
   </body>
