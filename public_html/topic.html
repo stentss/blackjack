@@ -185,7 +185,7 @@
               div.innerHTML = `
                 <h4>${item.Title}</h4>
                 <p><strong>Type:</strong> ${item.ContentType}</p>
-                <p><strong>Created By:</strong> ${item.Username} on ${new Date(item.CreatedAt).toLocaleString()}</p>
+                <p><strong>Created By:</strong> ${item.Username}</p>
                 ${item.ContentURL ? `<p><a href="${item.ContentURL}" target="_blank">📎 Link</a></p>` : ""}
                 <div style="margin-top: 10px; text-align: center;">
                   <a class="view-btn" href="view-content.html?id=${item.ID}">View</a>
