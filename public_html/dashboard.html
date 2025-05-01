@@ -173,11 +173,10 @@
           <a
             href="approve-content.html"
             style="color: lightgreen; font-weight: bold"
-            >Approve Content</a
+            >✅ Approve Content</a
           >
         </div>
       </div>
-
       <div class="header-right">
         <div id="settings-icon" style="cursor: pointer">⚙️</div>
         <div id="settings-menu" class="settings-menu">
@@ -186,13 +185,11 @@
         </div>
       </div>
     </header>
-
     <nav class="tabs">
-      <div class="tab active" data-tab="learn">Learn</div>
-      <div class="tab" data-tab="drill">Drill</div>
-      <div class="tab" data-tab="simulate">Simulate</div>
+      <div class="tab active" data-tab="learn">📘 Learn</div>
+      <div class="tab" data-tab="drill">🧠 Drill</div>
+      <div class="tab" data-tab="simulate">🎮 Simulate</div>
     </nav>
-
     <main>
       <section id="learn" class="content active">
         <div id="topic-container"></div>
@@ -208,7 +205,6 @@
           </p>
         </a>
       </section>
-
       <section id="drill" class="content">
         <div class="card">
           <h3>Running Count Drill</h3>
@@ -219,17 +215,30 @@
           <a href="running-count.html" class="button">Start Drill</a>
         </div>
       </section>
-
       <section id="simulate" class="content">
-        <div class="card">
-          <h3>Game Simulator</h3>
-          <p>
-            Play simulated blackjack games against a virtual dealer with
-            optional hints or tracking.
-          </p>
-          <a href="simulate.html" class="button">Start</a>
+        <div style="display: flex; gap: 20px;">
+          <div style="flex: 2;">
+            <div class="card">
+              <h3>Game Simulator</h3>
+              <p>
+                Play simulated blackjack games against a virtual dealer with optional hints or tracking.
+              </p>
+              <a href="simulate.html" class="button">Start</a>
+            </div>
+          </div>
+      
+          <div style="flex: 1;">
+            <div class="card">
+              <h3>Your Statistics</h3>
+              <button onclick="loadStatistics()">Refresh</button>
+              <div id="stats-area">
+                <p>Click refresh to load your stats.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
+        
     </main>
 
     <script>
@@ -373,6 +382,28 @@
           }
         });
       });
+      function loadStatistics() {
+        fetch('/get-statistics')
+          .then(res => res.json())
+          .then(data => {
+            const statsArea = document.getElementById('stats-area');
+            if (data.error) {
+              statsArea.innerHTML = `<p>${data.error}</p>`;
+            } else {
+              statsArea.innerHTML = `
+                <p><strong>Sessions:</strong> ${data.SessionCount}</p>
+                <p><strong>Total Wagered:</strong> $${data.TotalWagered}</p>
+                <p><strong>Total Won:</strong> $${data.TotalWon}</p>
+                <p><strong>Win Percentage:</strong> ${data.WinPercentage.toFixed(2)}%</p>
+                <p><strong>Average Bet:</strong> $${data.AverageBet}</p>
+              `;
+            }
+          })
+          .catch(err => {
+            document.getElementById('stats-area').innerHTML = `<p>Failed to load statistics.</p>`;
+            console.error(err);
+          });
+      }
     </script>
   </body>
 </html>
