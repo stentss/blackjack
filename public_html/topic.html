@@ -149,6 +149,18 @@
     <script>
       const params = new URLSearchParams(window.location.search);
       const topicId = params.get("id");
+      let currentUserType = null;
+      let currentUsername = null;
+
+      fetch("/check_login")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.logged_in) {
+            currentUserType = data.user.Usertype;
+            currentUsername = data.user.Username;
+          }
+          loadContent();
+        });
 
       fetch(`/get-topic/${topicId}`)
         .then((res) => res.json())
@@ -173,18 +185,13 @@
               div.innerHTML = `
                 <h4>${item.Title}</h4>
                 <p><strong>Type:</strong> ${item.ContentType}</p>
-                ${
-                  item.ContentURL
-                    ? `<p><a href="${item.ContentURL}" target="_blank">📎 Link</a></p>`
-                    : ""
-                }
+                <p><strong>Created By:</strong> ${item.Username} on ${new Date(item.CreatedAt).toLocaleString()}</p>
+                ${item.ContentURL ? `<p><a href="${item.ContentURL}" target="_blank">📎 Link</a></p>` : ""}
                 <div style="margin-top: 10px; text-align: center;">
-                  <a class="view-btn" href="view-content.html?id=${
-                    item.ID
-                  }">View</a>
-                  <button class="view-btn" style="background-color: #ff4d4d;" onclick="deleteContent(${
-                    item.ID
-                  })">Delete</button>
+                  <a class="view-btn" href="view-content.html?id=${item.ID}">View</a>
+                  ${(currentUserType === "admin" || item.Username === currentUsername)
+                    ? `<button class="view-btn" style="background-color: #ff4d4d;" onclick="deleteContent(${item.ID})">Delete</button>`
+                    : ""}
                 </div>
               `;
               container.appendChild(div);
