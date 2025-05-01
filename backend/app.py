@@ -306,19 +306,24 @@ def get_topic_content(topic_id):
     with conn.cursor() as cur:
         if approved_only:
             cur.execute("""
-                SELECT * FROM EducationalContent 
-                WHERE TopicID = %s AND IsApproved = 1
-                ORDER BY CreatedAt DESC
+                SELECT ec.*, u.Username 
+                FROM EducationalContent ec 
+                JOIN User u ON ec.CreatedBy = u.UserID 
+                WHERE ec.TopicID = %s AND ec.IsApproved = 1
+                ORDER BY ec.CreatedAt DESC
             """, (topic_id,))
         else:
             cur.execute("""
-                SELECT * FROM EducationalContent 
-                WHERE TopicID = %s
-                ORDER BY CreatedAt DESC
+                SELECT ec.*, u.Username 
+                FROM EducationalContent ec 
+                JOIN User u ON ec.CreatedBy = u.UserID 
+                WHERE ec.TopicID = %s
+                ORDER BY ec.CreatedAt DESC
             """, (topic_id,))
         content = cur.fetchall()
     conn.close()
     return jsonify(content)
+
 
 
 @app.route('/delete-topic/<int:topic_id>', methods=['POST'])
