@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import uuid
 from textblob import TextBlob
+from datetime import datetime
 
 # Get the current directory (where the app is running)
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -645,6 +646,103 @@ def update_account():
             return jsonify({'success': True})
     finally:
         conn.close()
+
+# session handling
+@app.route('/start-session', methods=['POST'])
+def start_session():
+    if 'user' not in session:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute("SELECT UserID FROM User WHERE Username = %s", (session['user'],))
+        user = cur.fetchone()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        cur.execute("""
+            INSERT INTO Session (StartTime, EndTime, Status, TotalWagered, TotalWon, UserID)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (int(datetime.now().timestamp()), 0, 'in-progress', 0, 0, user['UserID']))
+        conn.commit()
+        session_id = cur.lastrowid
+
+    conn.close()
+    return jsonify({"message": "Session started", "session_id": session_id})
+
+
+@app.route('/log-game', methods=['POST'])
+def log_game():
+    if 'user' not in session:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.json
+    session_id = data.get('session_id')
+    round_number = data.get('round_number')
+    user_action = data.get('user_action')
+    dealer_hand = data.get('dealer_hand')
+    user_hand = data.get('user_hand')
+    result = data.get('result')
+
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute("""
+            INSERT INTO Game (GameID, RoundNumber, UserAction, DealerHand, UserHand, Result, SessionID)
+            VALUES (NULL, %s, %s, %s, %s, %s, %s)
+        """, (round_number, user_action, dealer_hand, user_hand, result, session_id))
+        conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Game round logged"})
+
+
+@app.route('/end-session', methods=['POST'])
+def end_session():
+    if 'user' not in session:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.json
+    session_id = data.get('session_id')
+    total_wagered = data.get('total_wagered')
+    total_won = data.get('total_won')
+
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        # Update session record
+        cur.execute("""
+            UPDATE Session SET EndTime = %s, Status = %s, TotalWagered = %s, TotalWon = %s
+            WHERE SessionID = %s
+        """, (int(datetime.now().timestamp()), 'completed', total_wagered, total_won, session_id))
+        
+        # Update or insert statistics
+        cur.execute("SELECT * FROM Statistics WHERE UserID = (SELECT UserID FROM Session WHERE SessionID = %s)", (session_id,))
+        stats = cur.fetchone()
+        
+        if stats:
+            new_session_count = stats['SessionCount'] + 1
+            new_total_wagered = stats['TotalWagered'] + total_wagered
+            new_total_won = stats['TotalWon'] + total_won
+            win_percentage = (new_total_won / new_total_wagered) * 100 if new_total_wagered > 0 else 0
+            avg_bet = new_total_wagered / new_session_count
+
+            cur.execute("""
+                UPDATE Statistics 
+                SET SessionCount = %s, TotalWagered = %s, TotalWon = %s, WinPercentage = %s, AverageBet = %s
+                WHERE UserID = (SELECT UserID FROM Session WHERE SessionID = %s)
+            """, (new_session_count, new_total_wagered, new_total_won, win_percentage, avg_bet, session_id))
+        else:
+            win_percentage = (total_won / total_wagered) * 100 if total_wagered > 0 else 0
+            avg_bet = total_wagered
+
+            cur.execute("""
+                INSERT INTO Statistics (StatisticsID, SessionCount, TotalWagered, TotalWon, WinPercentage, AverageBet, UserID)
+                VALUES (NULL, 1, %s, %s, %s, %s, (SELECT UserID FROM Session WHERE SessionID = %s))
+            """, (total_wagered, total_won, win_percentage, avg_bet, session_id))
+        
+        conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Session ended and statistics updated"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8047)
