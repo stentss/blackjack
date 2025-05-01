@@ -7,7 +7,7 @@ import uuid
 from textblob import TextBlob
 from datetime import datetime
 
-# Get the current directory (where the app is running)
+# Get the current directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(
@@ -29,7 +29,7 @@ DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
 
-# Upload folder inside your project structure
+# Upload folder where the uploads from the user go
 UPLOAD_FOLDER = os.path.join(BASE_DIR, '../public_html/static/uploads')
 ALLOWED_EXTENSIONS = {'pdf'}
 
@@ -743,6 +743,26 @@ def end_session():
     conn.close()
 
     return jsonify({"message": "Session ended and statistics updated"})
+    
+@app.route('/get-statistics')
+def get_statistics():
+    if 'user' not in session:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT SessionCount, TotalWagered, TotalWon, WinPercentage, AverageBet
+            FROM Statistics
+            WHERE UserID = (SELECT UserID FROM User WHERE Username = %s)
+        """, (session['user'],))
+        stats = cur.fetchone()
+    conn.close()
+
+    if stats:
+        return jsonify(stats)
+    else:
+        return jsonify({"error": "No statistics yet — play some games first!"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8047)
