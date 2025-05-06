@@ -1,9 +1,0 @@
-WSGIDaemonProcess rhnguyen_app python-home=/home/rhnguyen/backend/venv python-path=/home/rhnguyen/backend
-WSGIProcessGroup rhnguyen_app
-WSGIScriptAlias /~rhnguyen /home/rhnguyen/backend/wsgi.py
-
-<Directory /home/rhnguyen/backend>
-  <Files wsgi.py>
-    Require all granted
-  </Files>
-</Directory>
