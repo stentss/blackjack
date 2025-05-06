@@ -24,6 +24,7 @@ app.secret_key = 'cd147fb8a2bacb53c58c23ec089588e8d98438119044bdc7c986099dd0e9a7
 # DB_PASSWORD = ''
 # DB_NAME = ''
 
+# Gets the environment variables from the site where you deployed the web application (set them)
 DB_HOST = os.getenv('DB_HOST')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
